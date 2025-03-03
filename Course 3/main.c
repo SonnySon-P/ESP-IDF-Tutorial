@@ -13,14 +13,14 @@ void gpio_init()
     gpio_config_t io_conf;
     
     // 設定LED1引腳
-    io_conf.pin_bit_mask = (1ULL << LED1_PIN);  // 設置GPIO 2為輸出
+    io_conf.pin_bit_mask = (1ULL << LED1_PIN);  // 設置GPIO 9為輸出
     io_conf.mode = GPIO_MODE_OUTPUT;  // 設置為輸出模式
     io_conf.pull_up_en = GPIO_PULLUP_DISABLE;  // 禁用上拉電阻
     io_conf.pull_down_en = GPIO_PULLDOWN_DISABLE;  // 禁用下拉電阻
     gpio_config(&io_conf);  // 設定GPIO配置
 
     // 設定LED2引腳
-    io_conf.pin_bit_mask = (1ULL << LED2_PIN);  // 設置GPIO 4為輸出
+    io_conf.pin_bit_mask = (1ULL << LED2_PIN);  // 設置GPIO 16為輸出
     io_conf.mode = GPIO_MODE_OUTPUT;  // 設置為輸出模式
     io_conf.pull_up_en = GPIO_PULLUP_DISABLE;  // 禁用上拉電阻
     io_conf.pull_down_en = GPIO_PULLDOWN_DISABLE;  // 禁用下拉電阻
