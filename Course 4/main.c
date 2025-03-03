@@ -24,45 +24,38 @@ void gpio_init()
   gpio_config(&io_conf);  // 設定GPIO配置
 }
 
-// 控制LED開關的函數
-void toggle_led()
-{
-  // 初始狀態為關閉
-  static bool led_state = false;
-
-  // 反轉LED狀態
-  led_state = !led_state;
-
-  // 控制LED的開關
-  gpio_set_level(LED_PIN, led_state);
-}
-
 // 主程式
 void app_main()
 {
   // 初始化GPIO設定
   gpio_init();
 
-  // 上一次的按鈕狀態，初始化為true(假設按鈕沒被按下)
-  bool last_button_state = true;
+  // 上一次的按鈕狀態，初始化為false(假設按鈕沒被按下)
+  bool last_button_state = false;
 
   while (true) {
     // 讀取當前按鈕狀態
     bool current_button_state = gpio_get_level(BUTTON_PIN);
 
     // 檢查按鈕是否被按下(因使用了內建上拉電阻，當按鈕未被按下時，GPIO引腳會保持為高電位(true)；當按鈕被按下時，GPIO引腳會被拉低至低電位(false))
-    if (last_button_state == true && !current_button_state == true) {
-        toggle_led();  // 切換LED狀態
-        printf("按鈕被按下，LED狀態已切換\n");
+    if (current_button_state == false) {
+      if (last_button_state == false) {
+        // 打開LED
+        gpio_set_level(LED_PIN, 1);
+        last_button_state = true;
+        printf("按鈕被按下，LED被打開\n");
+      } else {
+        // 關閉LED
+        gpio_set_level(LED_PIN, 0);
+        last_button_state = false;
+        printf("按鈕被按下，LED被關閉\n");
+      }
 
-        // 防止重複觸發，等待按鈕釋放
-        while (!gpio_get_level(BUTTON_PIN)) {
-          vTaskDelay(10 / portTICK_PERIOD_MS);
-        }
+      // 防止重複觸發，等待按鈕釋放
+      while (!gpio_get_level(BUTTON_PIN)) {
+        vTaskDelay(10 / portTICK_PERIOD_MS);
+      }
     }
-
-    // 更新按鈕狀態，一直讓按鈕狀態處於true
-    last_button_state = current_button_state;
 
     // 防止過度佔用CPU
     vTaskDelay(10 / portTICK_PERIOD_MS);
