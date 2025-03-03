@@ -50,5 +50,5 @@ void app_main()
     gpio_init();
 
     // 創建一個 LED 閃爍任務
-    xTaskCreate(led_blink_task, "LED_blink_task", 2048, NULL, 5, NULL);
+    xTaskCreate(led_blink_task, "LED_blink_task", 2048, NULL, 5, NULL);  // 參數分別為任務函數的指標、任務的名稱、任務所需的堆疊深度(可以使用的內存大小)、遞給任務的參數、任務的優先級(5的意思為優先級相對於其他任務較高)、接收創建的任務的句柄(創建任務時返回的指標)
 }
