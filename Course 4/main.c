@@ -3,7 +3,7 @@
 #include "freertos/task.h"
 #include "driver/gpio.h"
 
-// 定義按鈕和 LED 引腳
+// 定義按鈕和LED引腳
 #define BUTTON_PIN 16  // 按鈕接在GPIO 16
 #define LED_PIN 9  // LED 燈泡接在GPIO 9
 
