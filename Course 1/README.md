@@ -1,11 +1,10 @@
 # 課程一
 
-**教學主題：** 平交道的警示燈
+**一、教學主題：** Hello, World!
 	
-**目的：** 學習善用GPIO引腳及time.sleep等指令，控制LED燈泡。
+**二、目的：** 理解ESP IDF程式的基本架構。
 
-**操作解說：** 線路配置如下圖所示：
-
+**操作解說：** 輸出Hello, World!至終端機
 <br>
 <div align="center">
 	<img src="./Wokwi截圖.png" alt="Editor" width="500">
