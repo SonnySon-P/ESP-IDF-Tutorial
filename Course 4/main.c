@@ -3,62 +3,68 @@
 #include "freertos/task.h"
 #include "driver/gpio.h"
 
-// 設定LED燈泡連接的GPIO引腳
-#define LED1_PIN 9  // LED1使用GPIO 9
-#define LED2_PIN 16  // LED2使用GPIO 16
+// 定義按鈕和 LED 引腳
+#define BUTTON_PIN 16  // 按鈕接在GPIO 16
+#define LED_PIN 9  // LED 燈泡接在GPIO 9
 
-// 初始化 GPIO 引腳配置
+// 初始化GPIO
 void gpio_init()
 {
-    gpio_config_t io_conf;
-    
-    // 設定LED1引腳
-    io_conf.pin_bit_mask = (1ULL << LED1_PIN);  // 設置GPIO 2為輸出
-    io_conf.mode = GPIO_MODE_OUTPUT;  // 設置為輸出模式
-    io_conf.pull_up_en = GPIO_PULLUP_DISABLE;  // 禁用上拉電阻
-    io_conf.pull_down_en = GPIO_PULLDOWN_DISABLE;  // 禁用下拉電阻
-    gpio_config(&io_conf);  // 設定GPIO配置
+  gpio_config_t io_conf = {};
 
-    // 設定LED2引腳
-    io_conf.pin_bit_mask = (1ULL << LED2_PIN);  // 設置GPIO 4為輸出
-    io_conf.mode = GPIO_MODE_OUTPUT;  // 設置為輸出模式
-    io_conf.pull_up_en = GPIO_PULLUP_DISABLE;  // 禁用上拉電阻
-    io_conf.pull_down_en = GPIO_PULLDOWN_DISABLE;  // 禁用下拉電阻
-    gpio_config(&io_conf);  // 設定GPIO配置
+  // 設定LED引腳
+  io_conf.pin_bit_mask = (1ULL << LED_PIN);  // 設定GPIO 16為輸出
+  io_conf.mode = GPIO_MODE_OUTPUT;  // 設定為輸出模式
+  gpio_config(&io_conf);  // 設定GPIO配置
+
+  // 設定BUTTON引腳
+  io_conf.pin_bit_mask = (1ULL << BUTTON_PIN);  // 設定GPIO 9為輸入
+  io_conf.mode = GPIO_MODE_INPUT;  // 設定為輸入模式
+  io_conf.pull_up_en = GPIO_PULLUP_ENABLE;  // 啟用內建上拉電阻，按鈕未按下時為高電平
+  gpio_config(&io_conf);  // 設定GPIO配置
 }
 
-// 控制LED1閃爍控制函數
-void led1_blink_task(void *arg)
+// 控制LED開關的函數
+void toggle_led()
 {
-    while (true) {
-        gpio_set_level(LED1_PIN, 1);  // 打開LED1
-        vTaskDelay(1200 / portTICK_PERIOD_MS);  // 延遲1200毫秒
+  // 初始狀態為關閉
+  static bool led_state = false;
 
-        gpio_set_level(LED1_PIN, 0);  // 關閉LED1
-        vTaskDelay(1200 / portTICK_PERIOD_MS);  // 延遲1200毫秒
-    }
+  // 反轉LED狀態
+  led_state = !led_state;
+
+  // 控制LED的開關
+  gpio_set_level(LED_PIN, led_state);
 }
 
-// 控制LED2閃爍控制函數
-void led2_blink_task(void *arg)
-{
-    while (true) {
-        gpio_set_level(LED2_PIN, 1);  // 打開LED2
-        vTaskDelay(1500 / portTICK_PERIOD_MS);  // 延遲1500毫秒
-
-        gpio_set_level(LED2_PIN, 0);  // 關閉LED2
-        vTaskDelay(1500 / portTICK_PERIOD_MS);  // 延遲1500毫秒
-    }
-}
-
-// 主函數
+// 主程式
 void app_main()
 {
-    // 初始化GPIO引腳
-    gpio_init();
+  // 初始化GPIO設定
+  gpio_init();
 
-    // 創建兩個LED閃爍任務
-    xTaskCreate(led1_blink_task, "LED1_blink_task", 2048, NULL, 5, NULL);
-    xTaskCreate(led2_blink_task, "LED2_blink_task", 2048, NULL, 5, NULL);
+  // 上一次的按鈕狀態，初始化為true(假設按鈕沒被按下)
+  bool last_button_state = true;
+
+  while (true) {
+    // 讀取當前按鈕狀態
+    bool current_button_state = gpio_get_level(BUTTON_PIN);
+
+    // 檢查按鈕是否被按下(因使用了內建上拉電阻，當按鈕未被按下時，GPIO引腳會保持為高電位(true)；當按鈕被按下時，GPIO引腳會被拉低至低電位(false))
+    if (last_button_state == true && !current_button_state == true) {
+        toggle_led();  // 切換LED狀態
+        printf("按鈕被按下，LED狀態已切換\n");
+
+        // 防止重複觸發，等待按鈕釋放
+        while (!gpio_get_level(BUTTON_PIN)) {
+          vTaskDelay(10 / portTICK_PERIOD_MS);
+        }
+    }
+
+    // 更新按鈕狀態，一直讓按鈕狀態處於true
+    last_button_state = current_button_state;
+
+    // 防止過度佔用CPU
+    vTaskDelay(10 / portTICK_PERIOD_MS);
+  }
 }
-
